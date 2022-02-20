@@ -1,8 +1,9 @@
 from sklearn.model_selection import GridSearchCV
 from sklearn.cluster import estimate_bandwidth
-from sklearn.neighbors import KernelDensity
+from sklearn.neighbors import KernelDensity,LocalOutlierFactor
 from scipy.spatial.distance import cdist
 from sklearn.decomposition import *
+from sklearn.svm import OneClassSVM
 
 import numpy as np
 
@@ -62,7 +63,18 @@ def distance_link(X_train, X_test, dist_type, append_name=''):
 
         dists[append_name+dist_type] = dist
         dists[append_name+'log'+dist_type] = log_dist
-
+    elif dist_type == 'oneClassSVM':
+        model = OneClassSVM(gamma='auto', kernel = 'rbf').fit(X_train)
+        log_dist = model.score_samples(X_test)
+        dist = np.ma.exp(log_dist)
+        dists[append_name+dist_type] = dist
+        dists[append_name+'log'+dist_type] = log_dist
+    elif dist_type == 'lof':
+        model = LocalOutlierFactor(novelty=True).fit(X_train)
+        log_dist = model.score_samples(X_test)
+        dist = np.ma.exp(log_dist)
+        dists[append_name+dist_type] = dist
+        dists[append_name+'log'+dist_type] = log_dist
     else:
         dist = cdist(X_train, X_test, dist_type)
         dists[append_name+dist_type] = np.mean(dist, axis=0)
@@ -75,7 +87,7 @@ def distance(X_train, X_test):
     Determine the distance from set X_test to set X_train.
     '''
     # For development
-    distance_list = ['pdf', 'mahalanobis']
+    distance_list = ['pdf', 'mahalanobis', 'oneClassSVM', 'lof']
 
     dists = {}
     for distance in distance_list:
