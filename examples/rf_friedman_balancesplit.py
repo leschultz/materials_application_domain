@@ -1,5 +1,4 @@
 from sklearn.ensemble import RandomForestRegressor
-from sklearn.cluster import KMeans
 
 from sklearn.model_selection import RepeatedKFold
 from sklearn.model_selection import GridSearchCV
@@ -20,25 +19,33 @@ def main():
     '''
 
     seed = 14987
-    save = 'run_rf_diffusion_kmeans_4_20'
-    points = 15
+    save = 'run_rf_friedman_5group_0.5'
+    points = 15 # 15
     uq_func = poly
     uq_coeffs_start = [0.0, 1.0, 0.1, 0.1, 0.1]
 
     # Load data
-    data = load_data.diffusion()
+    data = load_data.friedman()
     df = data['frame']
     X = data['data']
     y = data['target']
-    d = data['class_name']
+    d  = np.array([])
+    for i in X:
+        if i[0] <= 0.2:
+            d = np.append(d, 0)
+        elif i[0] <= 0.4:
+            d = np.append(d, 1)
+        elif i[0] <= 0.6:
+            d = np.append(d, 2)
+        elif i[0] <= 0.8:
+            d = np.append(d, 3)
+        else:
+            d = np.append(d, 4)
+
 
     # Splitters
     top_split = None
-    mid_split = splitters.RepeatedClusterSplit(
-                                               KMeans,
-                                               n_repeats=4,
-                                               n_clusters=20
-                                               )
+    mid_split = splitters.PercentageGroupOut(n_repeats=20, groups=d, percentage=0.5)
     bot_split = RepeatedKFold(n_splits=5, n_repeats=1)
 
     # ML setup
@@ -76,7 +83,9 @@ def main():
     splits.aggregate()  # combine all of the ml data
     statistics.folds(save)  # Gather statistics from data
 
-    # Make parity plots
+    #Make parity plots
+    # parity.make_plots(save, 'gpr_std')
+
     calibration.make_plots(save, points, 'stdcal', 'gpr_std')
     calibration.make_plots(save, points, 'stdcal', 'mahalanobis')
     calibration.make_plots(save, points, 'stdcal', 'attention_metric')

@@ -1,4 +1,5 @@
 from sklearn.ensemble import RandomForestRegressor
+from sklearn.cluster import KMeans
 
 from sklearn.model_selection import RepeatedKFold
 from sklearn.model_selection import GridSearchCV
@@ -19,10 +20,10 @@ def main():
     '''
 
     seed = 14987
-    save = 'run_rf_diffusion'
+    save = 'run_rf_diffusion_Chemical_leave1out_20'
     points = 15
     uq_func = poly
-    uq_coeffs_start = [0.0, 1.0, 0.1, 0.1]
+    uq_coeffs_start = [0.0, 1.0, 0.1, 0.1, 0.1]
 
     # Load data
     data = load_data.diffusion()
@@ -32,8 +33,8 @@ def main():
     d = data['class_name']
 
     # Splitters
-    top_split = splitters.BootstrappedLeaveOneGroupOut(n_repeats=20, groups=d)
-    mid_split = RepeatedKFold(n_splits=5, n_repeats=2)
+    top_split = None
+    mid_split = splitters.BootstrappedLeaveOneGroupOut(n_repeats=20, groups = d)
     bot_split = RepeatedKFold(n_splits=5, n_repeats=1)
 
     # ML setup
@@ -71,11 +72,12 @@ def main():
     splits.aggregate()  # combine all of the ml data
     statistics.folds(save)  # Gather statistics from data
 
-    # Make parity plots
-    parity.make_plots(save, 'gpr_std')
-
-    calibration.make_plots(save, points, 'std', 'gpr_std')
     calibration.make_plots(save, points, 'stdcal', 'gpr_std')
+    calibration.make_plots(save, points, 'stdcal', 'mahalanobis')
+    calibration.make_plots(save, points, 'stdcal', 'attention_metric')
+    calibration.make_plots(save, points, 'stdcal', 'attention_metric_ts_ss')
+    calibration.make_plots(save, points, 'stdcal', 'oneClassSVM')
+
 
 
 if __name__ == '__main__':

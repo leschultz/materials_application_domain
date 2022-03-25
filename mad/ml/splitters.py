@@ -1,4 +1,5 @@
 from sklearn.model_selection import GridSearchCV, LeaveOneGroupOut
+from sklearn.model_selection import train_test_split
 from sklearn.cluster import estimate_bandwidth
 from sklearn.neighbors import KernelDensity
 from sklearn.utils import resample
@@ -73,6 +74,87 @@ class BootstrappedLeaveOneGroupOut:
             g_sample = groups[indx_sample]
             for train, test in spltr.split(X_sample, y_sample, g_sample):
                 yield indx_sample[train], indx_sample[test]
+
+class PercentageGroupOut:
+    '''
+    Custom splitting class which with every iteration of n_repeats it will
+    generates a leaveout that is chemically "balanced".
+    For example, if A,B,C 3 chemical groups, a run with percentage = 50% may:
+    1. cut [A,B,C] into [A,B] as initial train and [C] initial leaveout chemically
+    2. replace 50% of C by data draw from [A,B] WITHOUT REPLACEMENT. [A,B] size shrink
+    3. Thus, our new leaveout have data that is in-domain data from [A,B] and OOD from C
+    '''
+
+    def __init__(self, n_repeats, groups, percentage, *args, **kwargs):
+        '''
+        inputs:
+            n_repeats = The number of times to apply splitting.
+            groups =  np.array of group classes for the dataset.
+        '''
+
+        self.groups = groups
+        self.n_repeats = n_repeats
+        self.percentage = percentage
+
+    def get_n_splits(self, X=None, y=None, groups=None):
+        '''
+        A method to return the O(N) number of splits.
+        '''
+
+        self.groups = groups
+        self.n_splits = self.n_repeats*len(set(groups))
+
+        return self.n_splits
+
+    def split(self, X=None, y=None, groups=None):
+        '''
+        For every iteration, bootstrap the original dataset, and leave
+        every group out as the testing set one time.
+        For the leaveout group, percentage of them is OOD, find same amount of
+        ID data from train to form a balance testset.
+        '''
+
+        indx = np.arange(X.shape[0])
+        spltr = LeaveOneGroupOut()
+        for rep in range(self.n_repeats):
+
+            indx_sample = resample(indx)
+            X_sample = X[indx_sample, :]
+            y_sample = y[indx_sample]
+            g_sample = groups[indx_sample]
+            # create intial train test split using chemical grouping
+            for train, test in spltr.split(X_sample, y_sample, g_sample):
+                # final index to return
+                tr_index = None
+                test_index = None
+
+                # total number of leaveout (initial cut based on chemical grouping)
+                N = test.shape[0]
+                # number of OOD we want to keep in initial test
+                n_ood = int( N * self.percentage )
+                # number of in-domain we want to draw from initial train
+                n_id = N - n_ood
+                assert n_id > 0 and n_ood > 0 and N == n_ood + n_id
+                # we draw n_id # of samples from train WITHOUT REPLACEMENT to form ID test data
+
+                # n_id may be larger than total # of training
+                # let's take half of the training data
+                if n_id > len(train):
+                    n_id = int( 0.5 * len(train))
+
+                tr, id_test = train_test_split(
+                    train, test_size= n_id , random_state=42)
+
+                # we draw n_ood # of samples from test to form OOD test dataset
+                _, ood_test = train_test_split(
+                    test, test_size= n_ood , random_state=42)
+
+                tr_index = tr.tolist()
+                # our final leaveout have both IN/OUT domain data based on chemical grouping
+                test_index = id_test.tolist() + ood_test.tolist()
+
+                yield indx_sample[tr_index], indx_sample[test_index]
+
 
 
 class ClusterSplit:
