@@ -1,0 +1,101 @@
+from pathos.multiprocessing import ProcessingPool as Pool
+from scipy.optimize import minimize
+from functools import partial
+from tqdm import tqdm
+
+import numpy as np
+import sys
+import os
+
+import torch
+
+
+def parallel(func, x, *args, **kwargs):
+    '''
+    Run some function in parallel.
+    '''
+
+    pool = Pool(os.cpu_count())
+    part_func = partial(func, *args, **kwargs)
+    with Pool(os.cpu_count()) as pool:
+        data = list(tqdm(
+                         pool.imap(part_func, x),
+                         total=len(x),
+                         file=sys.stdout
+                         ))
+
+    return data
+
+
+def llh(std, res, x, func):
+    '''
+    Compute the log likelihood.
+    '''
+
+    total = np.log(2*np.pi)
+    total += np.log(func(x, std)**2)
+    total += (res**2)/(func(x, std)**2)
+    total *= -0.5
+
+    return total
+
+
+def set_llh(std, y, y_pred, x, func):
+    '''
+    Compute the log likelihood for a dataset.
+    '''
+
+    res = y-y_pred
+
+    # Get negative to use minimization instead of maximization of llh
+    opt = minimize(
+                   lambda x: -sum(llh(std, res, x, func))/len(res),
+                   x,
+                   method='nelder-mead',
+                   )
+
+    params = opt.x
+
+    return params
+
+
+def chunck(x, n, mode='points'):
+    '''
+    Devide x data into n sized bins.
+    '''
+
+    if mode == 'points':
+        size = len(x)
+        n = size//n
+
+    for i in range(0, len(x), n):
+
+        x_new = x[i:i+n]
+        if len(x_new) == n:
+            yield x_new
+
+
+# Polynomial given coefficients
+def poly(c, std):
+    total = 0.0
+    for i in range(len(c)):
+        total += c[i]*std**i
+    return abs(total)
+
+
+# Power function
+def power(c, std):
+    return abs(c[0]*std**c[1])
+
+def extract_embeddings(dataset,  model):
+    with torch.no_grad():
+        model.eval()
+        embeddings = []
+
+        for data in dataset:
+
+            embeddings.append(
+                np.array(
+                    model.get_embedding(data).detach().numpy() ) )
+
+    return np.array(embeddings)
