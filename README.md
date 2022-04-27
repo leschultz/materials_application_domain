@@ -15,6 +15,7 @@ The structure of the code packages is as follows:
 │   ├── ml
 │   ├── plots 
 │   └── functions.py
+│   └── representation
 ├── setup.py
 └── tests
 ```
