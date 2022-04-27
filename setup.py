@@ -24,7 +24,8 @@ install_requires = [
                     'tqdm',
                     'pytest',
                     'openpyxl',
-		    'statsmodels'
+		    'statsmodels',
+		    'torch'
                     ]
 long_description = open('README.md').read()
 
