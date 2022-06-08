@@ -6,7 +6,7 @@ from sklearn.model_selection import GridSearchCV
 from sklearn.preprocessing import StandardScaler
 from sklearn.pipeline import Pipeline
 
-from mad.ml import splitters, feature_selectors, domain, domain_ctr_cosine, domain_ctr_cosine_nn
+from mad.ml import splitters, feature_selectors, domain, domain_ctr_cosine_nn
 from mad.datasets import load_data, statistics
 from mad.plots import parity, calibration
 from mad.functions import poly
@@ -20,16 +20,19 @@ def main():
     '''
 
     seed = 14987
-    save = 'run_rf_diffusion'
+    save = 'run_rf_friedman'
     uq_func = poly
     uq_coeffs_start = [0.0, 1.0, 0.1, 0.1]
 
     # Load data
-    data = load_data.diffusion()
+    data = load_data.friedman()
     df = data['frame']
     X = data['data']
     y = data['target']
-    d = data['class_name']
+    # d = data['class_name']
+    # fake group
+    d = np.array( [0 for x in range( len(X))] )
+
 
     # use for NN setup
     dataset_name = 'middle'

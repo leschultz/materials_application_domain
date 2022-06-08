@@ -23,7 +23,8 @@ install_requires = [
                     'tqdm',
                     'pytest',
                     'openpyxl',
-                    'gpytorch'
+                    'gpytorch',
+                    'torch'
                     ]
 long_description = open('README.md').read()
 

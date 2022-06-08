@@ -170,7 +170,7 @@ def domain_pred(data, ecut, stdc):
         i['in_domain'] = in_domain
 
 
-def plot_calibration(data, stdc, ecut, save):
+def plot_calibration(data, stdc, ecut, save, dist):
     '''
     Plot the calibration data.
 
@@ -231,7 +231,7 @@ def plot_calibration(data, stdc, ecut, save):
     return fig, ax
 
 
-def plot_score(data, stdc, ecut, save):
+def plot_score(data, stdc, ecut, save, dist_type):
     '''
     Plot the error in erros versus the dissimilarity metric.
 
@@ -274,14 +274,17 @@ def plot_score(data, stdc, ecut, save):
     ax[1].yaxis.set_label_position("right")
     for i in range(2):
         ax[i].set_ylabel(r'$|RMSE-\sigma_{cal}|/\sigma_{y}$')
-        ax[i].set_xlabel(r'GPR $\sigma$')
+        ax[i].set_xlabel(dist_type) # should be distanace
         ax[i].axhline(ecut, linestyle=':', color='r', label=r'$E_{c}$')
 
     ax[0].legend()
 
     # Make same sale
-    ax[0].set_xlim(ax[1].get_xlim())
-    ax[0].set_ylim(ax[1].get_ylim())
+    # ax[0].set_xlim(ax[1].get_xlim()) # train
+    # ax[0].set_ylim(ax[1].get_ylim())
+
+
+
 
     fig.savefig(os.path.join(save, 'err_in_errs.png'))
 
@@ -430,16 +433,19 @@ def plot_pr(data, save):
            )
 
 
-def make_plots(save, xaxis, dist):
+def make_plots(save, xaxis, dist, aggregate = False):
     '''
     The general workflow.
     '''
 
     bins = 10
     control = 'quantiles'
-
-    df = pd.read_csv(os.path.join(save, 'aggregate/data.csv'))
+    if not aggregate:
+        df = pd.read_csv(os.path.join(save, 'aggregate/data.csv'))
+    else:
+        df = pd.read_csv(os.path.join(save, './aggregate_data.csv'))
     df = df.sort_values(by=['stdcal', 'y_pred', dist])
+    # df = df.sort_values(by=[dist])
 
     # Get values from training CV
     df_tr = df[df['in_domain'] == 'tr']
@@ -461,12 +467,13 @@ def make_plots(save, xaxis, dist):
             'aggregate',
             'plots',
             'total',
+            dist,
             'calibration',
             ]
 
     save = os.path.join(*save)
     os.makedirs(save, exist_ok=True)
 
-    plot_calibration(data, stdc, ecut, save)
-    plot_score(data, stdc, ecut, save)
+    plot_calibration(data, stdc, ecut, save, dist)
+    plot_score(data, stdc, ecut, save, dist)
     plot_pr(data, save)

@@ -7,6 +7,8 @@ import numpy as np
 import sys
 import os
 
+import torch
+
 
 def parallel(func, x, *args, **kwargs):
     '''
@@ -84,3 +86,13 @@ def poly(c, std):
 # Power function
 def power(c, std):
     return abs(c[0]*std**c[1])
+# extract learned representation for each sample
+def extract_embeddings(dataset,  model):
+    with torch.no_grad():
+        model.eval()
+        embeddings = []
+
+        for data in dataset:
+            embeddings.append(
+                    model.get_embedding(data).cpu().data.numpy()  )
+    return np.array(embeddings)

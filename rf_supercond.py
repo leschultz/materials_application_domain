@@ -20,12 +20,12 @@ def main():
     '''
 
     seed = 14987
-    save = 'run_rf_diffusion'
+    save = 'run_rf_supercond'
     uq_func = poly
     uq_coeffs_start = [0.0, 1.0, 0.1, 0.1]
 
     # Load data
-    data = load_data.diffusion()
+    data = load_data.super_cond()
     df = data['frame']
     X = data['data']
     y = data['target']
@@ -83,10 +83,10 @@ def main():
     # Make parity plots
     parity.make_plots(save, 'gpr_std')
     calibration.make_plots(save, 'stdcal', 'gpr_std')
-    parity.make_plots(save, 'cosine_ctr')
-    calibration.make_plots(save, 'stdcal', 'cosine_ctr')
     parity.make_plots(save, 'cosine')
     calibration.make_plots(save, 'stdcal', 'cosine')
+    parity.make_plots(save, 'cosine_ctr')
+    calibration.make_plots(save, 'stdcal', 'cosine_ctr')
     parity.make_plots(save, 'cosine_nn')
     calibration.make_plots(save, 'stdcal', 'cosine_nn')
 
