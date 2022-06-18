@@ -102,7 +102,8 @@ class builder:
                  seed=1,
                  uq_func=poly,
                  uq_coeffs_start=[0.0, 1.0],
-                 dataset_name = None
+                 dataset_name = None,
+                 joint_domain = False
                  ):
         '''
         inputs:
@@ -132,6 +133,9 @@ class builder:
         # Output directory creation
         self.save = save
         self.dataset_name = dataset_name
+        # if True, then use case_by_case err in err (stdcal) and binned err in err together.
+        # if False, only use binned error in error
+        self.joint_domain = joint_domain
 
     def assess_domain(self):
         '''
@@ -174,6 +178,7 @@ class builder:
                  uq_func=self.uq_func,
                  uq_coeffs_start=self.uq_coeffs_start,
                  dataset_name = self.dataset_name,
+                 joint_domain = self.joint_domain
                  )
 
     def nestedcv(
@@ -186,7 +191,8 @@ class builder:
                  save,
                  uq_func,
                  uq_coeffs_start,
-                 dataset_name # for contrastive learning setup
+                 dataset_name, # for contrastive learning setup
+                 joint_domain,
                  ):
         '''
         A class for nesetd cross validation.
@@ -369,6 +375,14 @@ class builder:
                                     std = std,
                                     bins = bin_num,
                                     quantile = 0.5 )
+            cases_by_case_err = stdcal_cv
+            cut = pd.Series(cases_by_case_err ).quantile([0.7]).values[0]
+            if joint_domain:
+                # consider 2 definition of domain together
+                labels2 = [1 if err < cut else 0 for err in cases_by_case_err ]
+                assert len(labels) == len(labels2)
+                labels_joint = [ 1 if labels2[i] + labels[i] >= 1 else 0 for i in range(len(labels2))]
+                labels = labels_joint
 
             assert dataset_name != None
             repr_model = train_representation_cosine(train_ctr, labels, dataset_name)

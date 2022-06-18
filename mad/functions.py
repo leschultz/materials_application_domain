@@ -90,9 +90,5 @@ def power(c, std):
 def extract_embeddings(dataset,  model):
     with torch.no_grad():
         model.eval()
-        embeddings = []
-
-        for data in dataset:
-            embeddings.append(
-                    model.get_embedding(data).cpu().data.numpy()  )
+        embeddings = model.get_embedding(dataset).cpu().data.numpy()
     return np.array(embeddings)

@@ -40,8 +40,8 @@ def main():
 
     top_split = splitters.RepeatedClusterSplit(
                        KMeans,
-                       n_repeats=2,
-                       n_clusters=10
+                       n_repeats=1,
+                       n_clusters=20
                     )
     bot_split = RepeatedKFold(n_splits=5, n_repeats=1)
 
@@ -73,7 +73,8 @@ def main():
                             seed=seed,
                             uq_func=uq_func,
                             uq_coeffs_start=uq_coeffs_start,
-                            dataset_name = dataset_name
+                            dataset_name = dataset_name,
+                            joint_domain = False
                             )
 
     splits.assess_domain()  # Do ML

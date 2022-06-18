@@ -13,16 +13,22 @@ class EmbeddingNetMiddle(nn.Module):
         # have hidden layer, last layer as embedding
         self.fc = nn.Sequential(nn.Linear(self.input_size, hidden_size),
                                 nn.ReLU(),
+                                nn.Dropout(p=0.1, inplace=False),
                                 nn.Linear(hidden_size, hidden_size),
                                 nn.ReLU(),
+                                nn.Dropout(p=0.1, inplace=False),
                                 nn.Linear(hidden_size, hidden_size),
                                 nn.ReLU(),
+                                nn.Dropout(p=0.1, inplace=False),
                                 nn.Linear(hidden_size, hidden_size),
                                 nn.ReLU(),
+                                nn.Dropout(p=0.1, inplace=False),
                                 nn.Linear(hidden_size, hidden_size),
                                 nn.ReLU(),
+                                nn.Dropout(p=0.1, inplace=False),
                                 nn.Linear(hidden_size, hidden_size),
                                 nn.ReLU(),
+                                nn.Dropout(p=0.1, inplace=False),
                                 nn.Linear(hidden_size, self.embedding_size)
                                 )
 
@@ -45,12 +51,17 @@ class EmbeddingNetSmall(nn.Module):
         # have hidden layer, last layer as embedding
         self.fc = nn.Sequential(nn.Linear(self.input_size, hidden_size),
                                 nn.ReLU(),
+                                nn.Dropout(p=0.1, inplace=False),
                                 nn.Linear(hidden_size, hidden_size),
                                 nn.ReLU(),
+                                nn.Dropout(p=0.1, inplace=False),
                                 nn.Linear(hidden_size, hidden_size),
                                 nn.ReLU(),
+                                nn.Dropout(p=0.1, inplace=False),
                                 nn.Linear(hidden_size, hidden_size),
                                 nn.ReLU(),
+                                nn.Dropout(p=0.1, inplace=False),
+
                                 nn.Linear(hidden_size, self.embedding_size)
                                 )
 
@@ -73,22 +84,31 @@ class EmbeddingNetLarge(nn.Module):
         # have hidden layer, last layer as embedding
         self.fc1 = nn.Sequential(nn.Linear(self.input_size, hidden_size),
                                 nn.ReLU(),
+                                nn.Dropout(p=0.1, inplace=False),
                                 nn.Linear(hidden_size, hidden_size),
                                 nn.ReLU(),
+                                nn.Dropout(p=0.1, inplace=False),
                                 nn.Linear(hidden_size, hidden_size),
                                 nn.ReLU(),
+                                nn.Dropout(p=0.1, inplace=False),
                                 nn.Linear(hidden_size, hidden_size),
                                 nn.ReLU(),
+                                nn.Dropout(p=0.1, inplace=False),
                                 nn.Linear(hidden_size, hidden_size),
                                 nn.ReLU(),
+                                nn.Dropout(p=0.1, inplace=False),
                                 nn.Linear(hidden_size, hidden_size),
                                 nn.ReLU(),
+                                nn.Dropout(p=0.1, inplace=False),
                                 nn.Linear(hidden_size, hidden_size),
                                 nn.ReLU(),
+                                nn.Dropout(p=0.1, inplace=False),
                                 nn.Linear(hidden_size, hidden_size),
                                 nn.ReLU(),
+                                nn.Dropout(p=0.1, inplace=False),
                                 nn.Linear(hidden_size, hidden_size),
                                 nn.ReLU(),
+                                nn.Dropout(p=0.1, inplace=False),
                                 )
         # self.bn = nn.BatchNorm1d(hidden_size)
         self.fc2 = nn.Linear(hidden_size, self.embedding_size)

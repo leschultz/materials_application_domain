@@ -83,7 +83,7 @@ def train_representation_cosine(data, label, dataset_name, loss = 'cosine'):
     scheduler = lr_scheduler.StepLR(optimizer, 8, gamma=0.1, last_epoch=-1)
 
     datasampler = BatchPairSampling( dataset = data , labels= label)
-    loader = torch.utils.data.DataLoader(datasampler, batch_size=batch_size, shuffle=True)
+    loader = torch.utils.data.DataLoader(datasampler, batch_size=batch_size, shuffle=True, drop_last = True)
 
     fit(loader, model, loss_fn, optimizer, scheduler, n_epochs, cuda, interval)
 

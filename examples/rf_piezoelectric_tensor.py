@@ -75,7 +75,8 @@ def main():
                             seed=seed,
                             uq_func=uq_func,
                             uq_coeffs_start=uq_coeffs_start,
-                            dataset_name = dataset_name
+                            dataset_name = dataset_name,
+                            joint_domain = False
                             )
 
     splits.assess_domain()  # Do ML
