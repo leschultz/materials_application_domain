@@ -374,14 +374,14 @@ class builder:
             labels = define_labels( dataframe = df_temp,
                                     std = std,
                                     bins = bin_num,
-                                    quantile = 0.5 )
+                                    quantile = 0.95 )
             cases_by_case_err = stdcal_cv
             cut = pd.Series(cases_by_case_err ).quantile([0.7]).values[0]
             if joint_domain:
                 # consider 2 definition of domain together
                 labels2 = [1 if err < cut else 0 for err in cases_by_case_err ]
                 assert len(labels) == len(labels2)
-                labels_joint = [ 1 if labels2[i] + labels[i] >= 1 else 0 for i in range(len(labels2))]
+                labels_joint = [ 1 if labels2[i] + labels[i] == 2 else 0 for i in range(len(labels2))]
                 labels = labels_joint
 
             assert dataset_name != None
