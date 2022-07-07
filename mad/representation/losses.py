@@ -1127,6 +1127,7 @@ def get_similarity_matrix(outputs, chunk=2, multi_gpu=False):
     return sim_matrix
 
 
+# Reference: https://github.com/alinlab/CSI
 def NT_xent(positive, negative, temperature=0.5, chunk=2, eps=1e-8):
     '''
         Compute NT_xent loss
@@ -1149,6 +1150,7 @@ def NT_xent(positive, negative, temperature=0.5, chunk=2, eps=1e-8):
 
     return loss
 
+# Reference: https://github.com/alinlab/CSI
 class Supervised_NT_xent(nn.Module):
     def __init__(self, temperature):
         super(Supervised_NT_xent, self).__init__()
